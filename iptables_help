@@ -1,0 +1,6 @@
+# открыть порт 445 на localhost (127.0.0.1)
+sudo iptables -t filter -A INPUT -p tcp -s localhost --dport 445 -m state --state NEW -j DROP
+# очистить правила iptables
+sudo iptables -F
+# показать правила
+sudo iptables -nvL
