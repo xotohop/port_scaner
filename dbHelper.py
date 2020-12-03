@@ -6,7 +6,7 @@ c = conn.cursor()
 
 # в БД сохраняются только время и открытые порты.
 def createDB(c, conn):
-    c.execute('''CREATE TABLE IF NOT EXISTS scans (date DATE, host TEXT, port INTEGER, PRIMARY KEY (date, host, port));''')
+    c.execute('''CREATE TABLE IF NOT EXISTS scans (date DATETIME, host TEXT, port INTEGER, PRIMARY KEY (date, host, port))''')
     conn.commit()
 
 def getData(c, conn, startDate: str = '2000', endDate: str = '5000', hosts: list = [], ports: list = []):
@@ -21,7 +21,7 @@ def getData(c, conn, startDate: str = '2000', endDate: str = '5000', hosts: list
     else:
         hostList = ''
     
-    return c.execute(f'SELECT * FROM scans WHERE {startDate} <= date <= {endDate}{hostList}{portsList};')
+    return c.execute(f"SELECT * FROM scans WHERE datetime('{startDate}') <= date <= datetime('{endDate}'){hostList}{portsList};")
 
 
 # При добавленнии надо сделать первый элемент списка с текущим временем и портом -1. Так можно понять, что в это время было сканирование.
@@ -36,7 +36,6 @@ def compare(c, conn, host: str, listOfData: list):
     c.execute(f"""SELECT * FROM scans WHERE date = (SELECT MAX(date) FROM scans GROUP BY host HAVING date = '{host}') AND host = '{host}';""")
     previousData = c.fetchall()
     for item in previousData:
-        # print(list(item))
         if (list(item) in listOfData):
             listOfData.remove(list(item))
         else:
@@ -51,19 +50,30 @@ def compare(c, conn, host: str, listOfData: list):
         return f'\nСписок портов которые закрылись после прошлого сканирования:\n{chages}.'
 
 
-# Пример использования
-# createDB(c, conn)
+# # Пример использования
+createDB(c, conn)
 
-# now = str(datetime.now())[:10]
+now = str(datetime.now())
 
-# insertData(c, conn, [[now, '1', -1], [now, '45.33.32.1576', 1], [now, '45.33.32.156', 2], [now, '216.58.210.174', 3], [now, '45.33.32.156', 4]]) ###Не забывать добавлять значение -1 после каждого сканирования
+insertData(c, conn, [[now, '1', -1], [now, '45.33.32.1576', 1], [now, '45.33.32.156', 2], [now, '216.58.210.174', 3], [now, '45.33.32.156', 4]]) ###Не забывать добавлять значение -1 после каждого сканирования
 
-# data = getData(c, conn, ports=[1, 2, 3, 5], hosts=['45.33.32.156', '216.58.210.174', '45.33.32.1576'], startDate="2020-12-02", endDate="2020-12-03") #Время не получается сравнить ((((
+data = getData(c, conn, ports=[1, 2, 3, 5], hosts=['45.33.32.156', '216.58.210.174', '45.33.32.1576'], startDate="2020-12-03 17:45:46.797540", endDate="2020-12-03 17:45:46.797540") #Время не получается сравнить ((((
 
-# for item in data:
-#     print(item)
+for item in data:
+    print(item)
 
 
-# data2 = compare(c, conn, host='45.33.32.156', listOfData=[[now, '45.33.32.156', 2]])
+data2 = compare(c, conn, host='45.33.32.156', listOfData=[[now, '45.33.32.156', 2]])
 
-# print(data2)
+print(data2)
+
+## result
+#
+##   ***Открытые порты***
+#  
+##   ('2020-12-03 18:42:33.282198', '45.33.32.1576', 1)
+##   ('2020-12-03 18:42:33.282198', '45.33.32.156', 2)
+##   ('2020-12-03 18:42:33.282198', '216.58.210.174', 3)
+#  
+##   Список портов, которые были закрыты при прошлом сканировании:
+##   [['2020-12-03 18:42:33.282198', '45.33.32.156', 2]].
