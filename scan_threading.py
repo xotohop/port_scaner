@@ -53,11 +53,13 @@ with open('output_temp') as output:
         curr_data.append([lst[0], lst[1], int(lst[2].strip())])
 
 for host in host_list:
+    print('Хост:', host)
     tmp_data = []
     for item in curr_data:
         if host in item:
             tmp_data.append(item)
     print(dbHelper.compare(c, conn, host, tmp_data))
+    print()
 
 dbHelper.insertData(c, conn, curr_data)
 
