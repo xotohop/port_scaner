@@ -20,7 +20,7 @@ def getData(c, conn, startDate: str = '2000', endDate: str = '5000', hosts: list
         hostList = ' AND host in (' + ", ".join("'{}'".format(k) for k in hosts) + ')'
     else:
         hostList = ''
-    
+
     return c.execute(f"SELECT * FROM scans WHERE datetime('{startDate}') <= date <= datetime('{endDate}'){hostList}{portsList};")
 
 
@@ -73,11 +73,11 @@ def compare(c, conn, host: str, listOfData: list):
 ## result
 #
 ##   ***Открытые порты***
-#  
+#
 ##   ('2020-12-03 19:36:31.884272', '45.33.32.1576', 1)
 ##   ('2020-12-03 19:36:31.884272', '45.33.32.156', 2)
 ##   ('2020-12-03 19:36:31.884272', '216.58.210.174', 3)
-#  
+#
 ##   Список портов, которые открылись после прошлого сканирования:
 ##   [['2020-12-03 19:36:31.884272', '45.33.32.156', 13]].
 ##   Список портов которые закрылись после прошлого сканирования:
