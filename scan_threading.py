@@ -1,7 +1,7 @@
 # coding=UTF-8
 
-import socket
-import threading
+from socket import *
+from threading import *
 import sys
 import os
 import argparse
@@ -9,28 +9,39 @@ from datetime import datetime
 import sqlite3
 import dbHelper
 
-stdout_fileno = sys.stdout  # сохраняем вывод по-умолчанию
-sys.stdout = open('output_temp', 'w')  # переводим вывод в файл output
+# сохраняем вывод по-умолчанию (т.е. в консоль)
+stdout_fileno = sys.stdout
+# переводим вывод в файл output
+sys.stdout = open('output_temp', 'w')
 
 
 def createParser():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-H', '--hostlist', default='host_list')
-    parser.add_argument('-P', '--portlist', default='port_list')
+    parser.add_argument('-H', '--hostlist', default='host_list', type=open)
+    parser.add_argument('-P', '--portlist', default='port_list', type=open)
     return parser
 
 
-def scan(time, host, port):
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.settimeout(0.5)  # время попытки соединения - 0.5 сек
+# параметры: time, host, port
+def scan(t, h, p):
     try:
-        conn = sock.connect((host, int(port)))
-        print(time, end=',')
-        print(host, end=',')
-        print(port, end='\n')
-        conn.close()
-    except:
+        # создаем
+        sock = socket(AF_INET, SOCK_STREAM)
+        # время попытки соединения - 0.5 сек
+        sock.settimeout(0.5)
+    # ошибка возникает в случе нехватки ресурсов для потоков
+    except OSError:
         pass
+    else:
+        try:
+            conn = sock.connect((h, int(p)))
+            print(t, end=',')
+            print(h, end=',')
+            print(p, end='\n')
+            conn.close()
+        # не удалось подключится или время истекло
+        except Exception:
+            pass
 
 
 now = str(datetime.now())
@@ -43,20 +54,31 @@ parser = createParser()
 namespace = parser.parse_args()
 
 host_list = []
+port_list = []
 
-with open('{}'.format(namespace.hostlist)) as hosts:
-    for host in hosts:
-        host_list.append(host.strip())
+for host in namespace.hostlist:
+    host_list.append(host.strip())
 
-for host in host_list:
-    with open('{}'.format(namespace.portlist)) as ports:
-        for port in ports:
-            thread = threading.Thread(target=scan, kwargs=({'time': now, 'host': host.strip(), 'port': port.strip()}))  # создаем потоки
-            thread.start()  # запускаем потоки
-thread.join()  # ждем завершения работы всех потоков
+for port in namespace.portlist:
+    port_list.append(port.strip())
 
-sys.stdout.close()  # закрываем файл output
-sys.stdout = stdout_fileno  # возвращаем вывод в консоль
+# закрываем hostlist и portlist
+namespace.hostlist.close()
+namespace.portlist.close()
+
+for h in host_list:
+    for p in port_list:
+        # создаем и запускаем потоки
+        thread = Thread(target=scan, kwargs=({'t': now, 'h': h, 'p': p}))
+        thread.start()
+
+# ждем завершения работы всех потоков
+thread.join()
+
+# закрываем файл output
+sys.stdout.close()
+# возвращаем вывод в консоль
+sys.stdout = stdout_fileno
 
 data = dbHelper.getData(c, conn)
 
