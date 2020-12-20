@@ -62,7 +62,7 @@ for host in namespace.hostlist:
 for port in namespace.portlist:
     port_list.append(port.strip())
 
-# закрываем hostlist и portlist
+# закрываем файлы со списками хостов и портов
 namespace.hostlist.close()
 namespace.portlist.close()
 
