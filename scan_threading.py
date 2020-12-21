@@ -8,7 +8,7 @@ from datetime import datetime
 import sqlite3
 import dbHelper
 
-bot = telebot.TeleBot('1438173397:AAHA9tBrGDzxFfb5cgNT47Qd7ED1c4ID000')
+bot = telebot.TeleBot('')
 stdout_fileno = sys.stdout # сохраняем вывод по-умолчанию
 sys.stdout = open('output_temp', 'w') # переводим вывод в файл output
 
