@@ -4,7 +4,7 @@ import json
 import os
 import time
 
-bot = telebot.TeleBot('1438173397:AAHA9tBrGDzxFfb5cgNT47Qd7ED1c4ID000')
+bot = telebot.TeleBot('')
 keyboard1 = telebot.types.ReplyKeyboardMarkup()
 keyboard2 = telebot.types.ReplyKeyboardMarkup()
 keyboard2.row('/Hosts', '/Добавить', '/Назад')
