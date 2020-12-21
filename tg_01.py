@@ -4,7 +4,7 @@ import json
 import os
 import time
 
-bot = telebot.TeleBot('')
+bot = telebot.TeleBot('1438173397:AAHA9tBrGDzxFfb5cgNT47Qd7ED1c4ID000')
 keyboard1 = telebot.types.ReplyKeyboardMarkup()
 keyboard2 = telebot.types.ReplyKeyboardMarkup()
 keyboard2.row('/Hosts', '/Добавить', '/Назад')
@@ -125,7 +125,7 @@ def HostList_text(message):
 
 	elif message.text[:5] == 'Хост ' and message.text[5:] in host_list:
 		with open('f_host', 'w') as host:
-			host.write(f'{message.chat.id} {message.text[5:]}\n')
+			host.write(f'{message.chat.id} {message.text[5:]}')
 		bot.send_message(message.chat.id, 'Готово!', reply_markup=keyboard1)
 		print(message)
 
