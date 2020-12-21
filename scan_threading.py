@@ -1,11 +1,14 @@
 import socket
 import threading
 import sys
+import telebot
 import os
+from tg_01 import sendinfo, getmsgid
 from datetime import datetime
 import sqlite3
 import dbHelper
 
+bot = telebot.TeleBot('')
 stdout_fileno = sys.stdout # сохраняем вывод по-умолчанию
 sys.stdout = open('output_temp', 'w') # переводим вывод в файл output
 
@@ -60,6 +63,20 @@ for host in host_list:
             tmp_data.append(item)
     print(dbHelper.compare(c, conn, host, tmp_data))
     print()
+
+
+#Новый, добавленный и пока не работющий кусок кода, для отправки сообщения
+with open('f_host') as f:
+	for line in f:
+		if line.strip() != '':
+			target = line
+print(target)
+a = dbHelper.compare(c, conn, target, curr_data)
+if a != '' and a != None:
+	# print(a.split(' ')[0], a.split(' ')[1])
+	bot.send_message(target.split(' ')[0], a)
+	print(message)
+
 
 dbHelper.insertData(c, conn, curr_data)
 
