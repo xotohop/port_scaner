@@ -8,7 +8,7 @@ from datetime import datetime
 import sqlite3
 import dbHelper
 
-bot = telebot.TeleBot('')
+bot = telebot.TeleBot('1438173397:AAHA9tBrGDzxFfb5cgNT47Qd7ED1c4ID000')
 stdout_fileno = sys.stdout # сохраняем вывод по-умолчанию
 sys.stdout = open('output_temp', 'w') # переводим вывод в файл output
 
@@ -46,7 +46,7 @@ thread.join() # ждем завершения работы всех потоко
 sys.stdout.close() # закрываем файл output
 sys.stdout = stdout_fileno # возвращаем вывод в консоль
 
-data = dbHelper.getData(c, conn)
+# data = dbHelper.getData(c, conn)
 
 curr_data = [[now, '1', -1]]
 
@@ -56,28 +56,29 @@ with open('output_temp') as output:
         curr_data.append([lst[0], lst[1], int(lst[2].strip())])
 
 for host in host_list:
-    print('Хост:', host)
+    # print('Хост:', host)
     tmp_data = []
     for item in curr_data:
         if host in item:
             tmp_data.append(item)
-    print(dbHelper.compare(c, conn, host, tmp_data))
-    print()
+    # print(dbHelper.compare(c, conn, host, tmp_data))
+    # print()
 
 
 #Новый, добавленный и пока не работющий кусок кода, для отправки сообщения
-with open('f_host') as f:
-	for line in f:
-		if line.strip() != '':
-			target = line
-print(target)
-a = dbHelper.compare(c, conn, target, curr_data)
-if a != '' and a != None:
-	# print(a.split(' ')[0], a.split(' ')[1])
+def SendNotification():
+	with open('f_host') as f:
+		for line in f:
+			if line.split() != '':
+				target = line
+	tt = target.split(' ')[1]
+	# print(target.split(' '))
+	b = [i for i in curr_data if i[1] == tt]
+	a = dbHelper.compare(c, conn, tt, b)
+
+	# print(a)
+	# if a!='\nИзменений с последнего сканирования не обнаружено.':
 	bot.send_message(target.split(' ')[0], a)
-	print(message)
-
-
+SendNotification()
 dbHelper.insertData(c, conn, curr_data)
-
 os.remove('output_temp')
