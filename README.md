@@ -14,8 +14,6 @@
 ###### Пример:
 
     python3 scan_threading.py --hostlist hosts --portlist ports
-    
-    ***Открытые порты***
 
     Хост: 192.168.0.12
 
