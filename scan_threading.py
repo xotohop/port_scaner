@@ -12,7 +12,7 @@ from datetime import datetime
 import sqlite3
 import dbHelper
 
-bot = telebot.TeleBot('1438173397:AAFHadsCXIkxJt_bRq0z97gK4uDkFwgOVgo')
+bot = telebot.TeleBot('')
 # сохраняем вывод по-умолчанию (т.е. в консоль)
 stdout_fileno = sys.stdout
 # переводим вывод в файл output
@@ -103,11 +103,11 @@ for host in host_list:
     print()
 
 
-# новый, добавленный и УЖЕ работющий кусок кода, для отправки сообщения
+#Получение из файла ID пользователя, формирование сообщений об изменении портов с последней работы скрипта, отправка в чат-бот
 def SendNotification():
 	with open('f_host') as ff:
 		PersonID = ff.readline()
-	bot.send_message(PersonID, 'Подъехала инфа по твоим хостам, суччара! :D')
+	bot.send_message(PersonID, 'Обновилась информация по отслеживаемым хостам:')
 	a = ''
 	for i in host_list:
 		a = str(f'Хост {i}:\n' + dbHelper.compare(c, conn, i, [b for b in curr_data if curr_data[1] == i]))
