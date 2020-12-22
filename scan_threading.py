@@ -12,8 +12,6 @@ import sqlite3
 import dbHelper
 
 bot = telebot.TeleBot('')
-stdout_fileno = sys.stdout # сохраняем вывод по-умолчанию
-sys.stdout = open('output_temp', 'w') # переводим вывод в файл output
 # сохраняем вывод по-умолчанию (т.е. в консоль)
 stdout_fileno = sys.stdout
 # переводим вывод в файл output
@@ -95,30 +93,28 @@ with open('output_temp') as output:
         curr_data.append([lst[0], lst[1], int(lst[2].strip())])
 
 for host in host_list:
-    # print('Хост:', host)
-    print('host:', host)
+    print('Хост:', host)
     tmp_data = []
     for item in curr_data:
         if host in item:
             tmp_data.append(item)
-    # print(dbHelper.compare(c, conn, host, tmp_data))
-    # print()
+    print(dbHelper.compare(c, conn, host, tmp_data))
+    print()
 
 
-#Новый, добавленный и пока не работющий кусок кода, для отправки сообщения
+# новый, добавленный и пока не работющий кусок кода, для отправки сообщения
 def SendNotification():
-	with open('f_host') as f:
-		for line in f:
-			if line.split() != '':
-				target = line
-	tt = target.split(' ')[1]
-	# print(target.split(' '))
-	b = [i for i in curr_data if i[1] == tt]
-	a = dbHelper.compare(c, conn, tt, b)
+    with open('f_host') as f:
+        for line in f:
+            if line.split() != '':
+                target = line
+    tt = target.split(' ')[1]
+    b = [i for i in curr_data if i[1] == tt]
+    a = dbHelper.compare(c, conn, tt, b)
+    bot.send_message(target.split(' ')[0], a)
 
-	# print(a)
-	# if a!='\nИзменений с последнего сканирования не обнаружено.':
-	bot.send_message(target.split(' ')[0], a)
 SendNotification()
+
 dbHelper.insertData(c, conn, curr_data)
+
 os.remove('output_temp')
