@@ -3,6 +3,7 @@
 from socket import *
 from threading import *
 import sys
+import time
 import telebot
 import os
 from tg_01 import sendinfo, getmsgid
@@ -11,7 +12,7 @@ from datetime import datetime
 import sqlite3
 import dbHelper
 
-bot = telebot.TeleBot('')
+bot = telebot.TeleBot('1438173397:AAFHadsCXIkxJt_bRq0z97gK4uDkFwgOVgo')
 # сохраняем вывод по-умолчанию (т.е. в консоль)
 stdout_fileno = sys.stdout
 # переводим вывод в файл output
@@ -102,16 +103,16 @@ for host in host_list:
     print()
 
 
-# новый, добавленный и пока не работющий кусок кода, для отправки сообщения
+# новый, добавленный и УЖЕ работющий кусок кода, для отправки сообщения
 def SendNotification():
-    with open('f_host') as f:
-        for line in f:
-            if line.split() != '':
-                target = line
-    tt = target.split(' ')[1]
-    b = [i for i in curr_data if i[1] == tt]
-    a = dbHelper.compare(c, conn, tt, b)
-    bot.send_message(target.split(' ')[0], a)
+	with open('f_host') as ff:
+		PersonID = ff.readline()
+	bot.send_message(PersonID, 'Подъехала инфа по твоим хостам, суччара! :D')
+	a = ''
+	for i in host_list:
+		a = str(f'Хост {i}:\n' + dbHelper.compare(c, conn, i, [b for b in curr_data if curr_data[1] == i]))
+		bot.send_message(PersonID, a)
+		time.sleep(1)
 
 SendNotification()
 
