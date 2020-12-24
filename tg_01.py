@@ -7,7 +7,7 @@ from collections import Counter
 import os
 import time
 
-bot = telebot.TeleBot('')
+bot = telebot.TeleBot('1438173397:AAFHadsCXIkxJt_bRq0z97gK4uDkFwgOVgo')
 keyboard1 = telebot.types.ReplyKeyboardMarkup()
 keyboard2 = telebot.types.ReplyKeyboardMarkup()
 keyboard2.row('/Hosts', '/Добавить', '/Назад')
@@ -77,13 +77,9 @@ def HostList_change(message):
 	bot.send_message(message.chat.id, 'Введи новый хост: или напиши "Отмена"')
 	print(message)
 
-# Функция для получения ID, пользователя, которому будет отправляться информация об изменении
-def getmsgid():
-	return person_id
-
 # Обработка сообщений: порт (для добавления в список портов), "Хост "порт"" - для выбора хоста как отслеживаемого, обработка некорректного ввода через else
 @bot.message_handler(content_types=['text'])
-def HostList_text(message):
+def common_text(message):
 	getid(message)
 	# print(str(message.text[:5]), message.text[5:], end='\n')
 	rewr(host_list)
