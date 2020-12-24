@@ -10,7 +10,6 @@ def createDB(c, conn):
     conn.commit()
 
 def getData(c, conn, startDate: str = '2000', endDate: str = '5000', hosts: list = [], ports: list = []):
-    print('\n***Открытые порты***\n')
     if (ports != []):
         portsList = f' AND port in ({", ".join(str(k) for k in ports)})'
     else:

@@ -7,7 +7,7 @@ c = conn.cursor()
 
 dbHelper.createDB(c, conn)
 
-data = dbHelper.getData(c)
+data = dbHelper.getData(c, conn)
 for item in data:
     print(item)
 
