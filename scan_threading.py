@@ -1,7 +1,7 @@
 # coding=UTF-8
 
-from socket import *
-from threading import *
+from socket import socket, AF_INET, SOCK_STREAM
+from threading import Thread
 import sys
 import time
 import telebot
@@ -10,7 +10,7 @@ import argparse
 from datetime import datetime
 from dbHelper import ScansDatabase
 
-bot = telebot.TeleBot('')
+bot = telebot.TeleBot('1438173397:AAFHadsCXIkxJt_bRq0z97gK4uDkFwgOVgo')
 
 # сохраняем вывод по-умолчанию (т.е. в консоль)
 stdout_fileno = sys.stdout
@@ -100,7 +100,7 @@ for host in host_list:
 
 #Получение из файла ID пользователя, формирование сообщений об изменении портов с последней работы скрипта, отправка в чат-бот
 def SendNotification():
-	with open('f_host') as ff:
+	with open('personID') as ff:
 		PersonID = ff.readline()
 	bot.send_message(PersonID, 'Обновилась информация по отслеживаемым хостам:')
 	a = ''

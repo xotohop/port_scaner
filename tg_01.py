@@ -17,10 +17,10 @@ host_list = []
 
 #Обработка ошибки считывания ID пользователя из файла
 try:
-	with open('f_host') as idset:
+	with open('personID') as idset:
 		person_id = idset.readline()
 except Exception:
-	with open('f_host', 'w') as idset:
+	with open('personID', 'w') as idset:
 		person_id = 0
 
 #Функция для работы с хостами
@@ -32,11 +32,11 @@ def rewr(a):
 # Перезапись списка host_list из файла
 rewr(host_list)
 
-#Получение ID пользователя для его последующей передачи файлу f_host
+#Получение ID пользователя для его последующей передачи файлу personID
 def getid(a):
 	global person_id
 	if person_id != a.chat.id:
-		with open('f_host', 'w') as setter:
+		with open('personID', 'w') as setter:
 			setter.write(str(a.chat.id))
 		person_id = a.chat.id
 
