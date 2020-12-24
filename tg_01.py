@@ -1,3 +1,5 @@
+# coding=UTF-8
+
 import telebot
 import telegram
 import json
@@ -9,10 +11,11 @@ bot = telebot.TeleBot('1438173397:AAFHadsCXIkxJt_bRq0z97gK4uDkFwgOVgo')
 keyboard1 = telebot.types.ReplyKeyboardMarkup()
 keyboard2 = telebot.types.ReplyKeyboardMarkup()
 keyboard2.row('/Hosts', '/Добавить', '/Назад')
-keyboard1.row('/start', '/info','/Hosts')
-host_list = []
-port_list = []
+keyboard1.row('/start', '/info', '/Hosts')
 
+host_list = []
+
+#Обработка ошибки считывания ID пользователя из файла
 try:
 	with open('f_host') as idset:
 		person_id = idset.readline()
@@ -26,8 +29,10 @@ def rewr(a):
 		for host in hosts:
 			a.append(host.strip())
 
+# Перезапись списка host_list из файла
 rewr(host_list)
 
+#Получение ID пользователя для его последующей передачи файлу f_host
 def getid(a):
 	global person_id
 	if person_id != a.chat.id:
@@ -44,7 +49,7 @@ def start_message(message):
 @bot.message_handler(commands=['info'])
 def info_message(message):
 	getid(message)
-	bot.send_message(message.chat.id, 'Ох...ну, если коротко, то бот позволяет получать информацию об открытых портах на твоём компьютере, а так же отслеживать изменения, связанные со списокм открытых портов на конкретный хост :)', reply_markup=keyboard1)
+	bot.send_message(message.chat.id, 'Бот позволяет получать информацию об открытых портах на твоём компьютере, а так же отслеживать изменения, связанные со списокм открытых портов на конкретный хост :)', reply_markup=keyboard1)
 	print(message)
 
 #Вывод списка хостов, переключение на вторую вкладку кнопок (с возможностью добавления хоста)
@@ -69,21 +74,12 @@ def HostList_back(message):
 @bot.message_handler(commands=['Добавить'])
 def HostList_change(message):
 	getid(message)
-	bot.send_message(message.chat.id, 'Окей, введи новый хост: или напиши "Отмена"')
+	bot.send_message(message.chat.id, 'Введи новый хост: или напиши "Отмена"')
 	print(message)
-
-#Заготовка неработающей функции (пока что реализуется в файле scan_threading.py)
-def sendinfo(s: str):
-	bot.send_message(message.chat.id, 'Обновилась инфа по отслеживаемому хосту! \n{s}')
-	print(message)
-
-# Функция для получения ID, пользователя, которому будет отправляться информация об изменении
-def getmsgid():
-	return person_id
 
 # Обработка сообщений: порт (для добавления в список портов), "Хост "порт"" - для выбора хоста как отслеживаемого, обработка некорректного ввода через else
 @bot.message_handler(content_types=['text'])
-def HostList_text(message):
+def common_text(message):
 	getid(message)
 	# print(str(message.text[:5]), message.text[5:], end='\n')
 	rewr(host_list)
