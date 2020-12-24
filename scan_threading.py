@@ -12,6 +12,7 @@ import sqlite3
 import dbHelper
 
 bot = telebot.TeleBot('')
+
 # сохраняем вывод по-умолчанию (т.е. в консоль)
 stdout_fileno = sys.stdout
 # переводим вывод в файл output
@@ -28,7 +29,7 @@ def createParser():
 # параметры: time, host, port
 def scan(t, h, p):
     try:
-        # создаем
+        # создаем IP/TCP сокет
         sock = socket(AF_INET, SOCK_STREAM)
         # время попытки соединения - 0.5 сек
         sock.settimeout(0.5)
