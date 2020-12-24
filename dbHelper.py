@@ -12,7 +12,11 @@ class ScansDatabase():
 
     # Создать таблицу со сканами
     def create_table(self):
-        self.cur.execute('''CREATE TABLE IF NOT EXISTS scans (date DATETIME, host TEXT, port INTEGER, PRIMARY KEY (date, host, port))''')
+        self.cur.execute('''CREATE TABLE IF NOT EXISTS scans (
+                            date DATETIME, 
+                            host TEXT, 
+                            port INTEGER, 
+                            PRIMARY KEY (date, host, port))''')
         self.connection.commit()
 
     # Получить данные из таблицы. Можно получить информациюю за определенную дату или по определенным хостам / портам
@@ -26,7 +30,9 @@ class ScansDatabase():
             hostList = ' AND host in (' + ", ".join("'{}'".format(k) for k in hosts) + ')'
         else:
             hostList = ''
-        return self.cur.execute(f"SELECT * FROM scans WHERE datetime('{startDate}') <= date <= datetime('{endDate}'){hostList}{portsList};")
+        return self.cur.execute(f"""SELECT * FROM scans 
+                                    WHERE datetime('{startDate}') <= date <= datetime('{endDate}')
+                                    {hostList}{portsList};""")
 
     # Запись данных в БД
     def insertData(self, listOfData: list):
@@ -37,7 +43,9 @@ class ScansDatabase():
     # сравнение текущих данных с последней записью в БД
     def compare(self, host: str, listOfData: list):
         chages = []
-        self.cur.execute(f"""SELECT host, port FROM scans WHERE date = (SELECT MAX(date) FROM scans WHERE host = '{host}') AND host = '{host}';""")
+        self.cur.execute(f"""SELECT host, port FROM scans 
+                            WHERE date = (SELECT MAX(date) FROM scans WHERE host = '{host}') 
+                            AND host = '{host}';""")
         previousData = self.cur.fetchall()
         for item in previousData:
             flag = False
@@ -50,7 +58,8 @@ class ScansDatabase():
         if (chages == [] and listOfData == []):
             return f'\nИзменений с последнего сканирования не обнаружено.'
         if (chages != [] and listOfData != []):
-            return f'\nСписок портов, которые открылись после прошлого сканирования:\n{listOfData}.\nСписок портов которые закрылись после прошлого сканирования:\n{chages}.'
+            return f'''\nСписок портов, которые открылись после прошлого сканирования:\n{listOfData}.
+                        \nСписок портов которые закрылись после прошлого сканирования:\n{chages}.'''
         if(listOfData != []):
             return f'\nСписок портов, которые были закрыты при прошлом сканировании:\n{listOfData}.'
         else:
@@ -65,16 +74,17 @@ class ScansDatabase():
 
 # Пример:
 
-# db = ScansDatabase()
+db = ScansDatabase()
 
-# now = str(datetime.now())
+now = str(datetime.now())
 
-# db.insertData([[now, '1', -1], [now, '45.33.32.1576', 1], [now, '45.33.32.156', 2], [now, '216.58.210.174', 3], [now, '45.33.32.156', 4]])
+db.insertData([[now, '1', -1], [now, '45.33.32.1576', 1], [now, '45.33.32.156', 2], [now, '216.58.210.174', 3], [now, '45.33.32.156', 4]])
 
-# print(db.compare(host='45.33.32.156', listOfData=[[now, '45.33.32.156', 2], [now, '45.33.32.156', 13]]))
+print(db.compare(host='45.33.32.156', listOfData=[[now, '45.33.32.156', 2], [now, '45.33.32.156', 13]]))
 
-# for i in db.getData():
-#     print(i)
+print()
+for i in db.getData():
+    print(i)
 
 # Список портов, которые открылись после прошлого сканирования:
 # [['2020-12-24 15:51:04.002335', '45.33.32.156', 13]].
