@@ -6,7 +6,6 @@ import sys
 import time
 import telebot
 import os
-from tg_01 import sendinfo, getmsgid
 import argparse
 from datetime import datetime
 import sqlite3
