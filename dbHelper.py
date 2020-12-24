@@ -1,83 +1,88 @@
 import sqlite3
 from datetime import datetime
 
-conn = sqlite3.connect('scan_results.db')
-c = conn.cursor()
+class ScansDatabase():
 
-# в БД сохраняются только время и открытые порты.
-def createDB(c, conn):
-    c.execute('''CREATE TABLE IF NOT EXISTS scans (date DATETIME, host TEXT, port INTEGER, PRIMARY KEY (date, host, port))''')
-    conn.commit()
+    def __init__(self):
+        self.connection = sqlite3.connect('scan_results.db')
+        self.cur = self.connection.cursor()
+        # При каждой инициализации будет вызван метод create_table(), который предотвратит ошибку, если таблица со сканами
+        # удалена или еще не была создана
+        self.create_table()
 
-def getData(c, conn, startDate: str = '2000', endDate: str = '5000', hosts: list = [], ports: list = []):
-    if (ports != []):
-        portsList = f' AND port in ({", ".join(str(k) for k in ports)})'
-    else:
-        portsList = ''
+    # Создать таблицу со сканами
+    def create_table(self):
+        self.cur.execute('''CREATE TABLE IF NOT EXISTS scans (date DATETIME, host TEXT, port INTEGER, PRIMARY KEY (date, host, port))''')
+        self.connection.commit()
 
-    if (hosts != []):
-        hostList = ' AND host in (' + ", ".join("'{}'".format(k) for k in hosts) + ')'
-    else:
-        hostList = ''
-    
-    return c.execute(f"SELECT * FROM scans WHERE datetime('{startDate}') <= date <= datetime('{endDate}'){hostList}{portsList};")
+    # Получить данные из таблицы. Можно получить информациюю за определенную дату или по определенным хостам / портам
+    def getData(self, startDate: str = '2000', endDate: str = '5000', hosts: list = [], ports: list = []):
+        if (ports != []):
+            portsList = f' AND port in ({", ".join(str(k) for k in ports)})'
+        else:
+            portsList = ''
+
+        if (hosts != []):
+            hostList = ' AND host in (' + ", ".join("'{}'".format(k) for k in hosts) + ')'
+        else:
+            hostList = ''
+        return self.cur.execute(f"SELECT * FROM scans WHERE datetime('{startDate}') <= date <= datetime('{endDate}'){hostList}{portsList};")
+
+    # Запись данных в БД
+    def insertData(self, listOfData: list):
+        for item in listOfData:
+            self.cur.execute("insert OR REPLACE into scans values (?, ?, ?);", (item[0], item[1], item[2]))
+        self.connection.commit()
+
+    # сравнение текущих данных с последней записью в БД
+    def compare(self, host: str, listOfData: list):
+        chages = []
+        self.cur.execute(f"""SELECT host, port FROM scans WHERE date = (SELECT MAX(date) FROM scans WHERE host = '{host}') AND host = '{host}';""")
+        previousData = self.cur.fetchall()
+        for item in previousData:
+            flag = False
+            for i in listOfData:
+                if (i[1:] == list(item)):
+                    flag = True
+                    listOfData.remove(i)
+            if (flag == False):
+                chages.append(list(item))
+        if (chages == [] and listOfData == []):
+            return f'\nИзменений с последнего сканирования не обнаружено.'
+        if (chages != [] and listOfData != []):
+            return f'\nСписок портов, которые открылись после прошлого сканирования:\n{listOfData}.\nСписок портов которые закрылись после прошлого сканирования:\n{chages}.'
+        if(listOfData != []):
+            return f'\nСписок портов, которые были закрыты при прошлом сканировании:\n{listOfData}.'
+        else:
+            return f'\nСписок портов которые закрылись после прошлого сканирования:\n{chages}.'
+
+    def __del__(self):
+        self.close()
+
+    def close(self):
+        self.connection.close()
 
 
-# При добавленнии надо сделать первый элемент списка с текущим временем и портом -1. Так можно понять, что в это время было сканирование.
-# Это на случаи, если при сканировании не будет открытых портов (вернется пустой список -> ничего не добавится в БД), но не было открытых портов.
-def insertData(c, conn, listOfData: list):
-    for item in listOfData:
-        c.execute("insert OR REPLACE into scans values (?, ?, ?);", (item[0], item[1], item[2]))
-    conn.commit()
+# Пример:
 
-def compare(c, conn, host: str, listOfData: list):
-    chages = []
-    c.execute(f"""SELECT host, port FROM scans WHERE date = (SELECT MAX(date) FROM scans WHERE host = '{host}') AND host = '{host}';""")
-    previousData = c.fetchall()
-    for item in previousData:
-        flag = False
-        for i in listOfData:
-            if (i[1:] == list(item)):
-                flag = True
-                listOfData.remove(i)
-        if (flag == False):
-            chages.append(list(item))
-    if (chages == [] and listOfData == []):
-        return f'\nИзменений с последнего сканирования не обнаружено.'
-    if (chages != [] and listOfData != []):
-        return f'\nСписок портов, которые открылись после прошлого сканирования:\n{listOfData}.\nСписок портов которые закрылись после прошлого сканирования:\n{chages}.'
-    if(listOfData != []):
-        return f'\nСписок портов, которые были закрыты при прошлом сканировании:\n{listOfData}.'
-    else:
-        return f'\nСписок портов которые закрылись после прошлого сканирования:\n{chages}.'
-
-
-# # # Пример использования
-# createDB(c, conn)
+# db = ScansDatabase()
 
 # now = str(datetime.now())
 
-# insertData(c, conn, [[now, '1', -1], [now, '45.33.32.1576', 1], [now, '45.33.32.156', 2], [now, '216.58.210.174', 3], [now, '45.33.32.156', 4]]) ###Не забывать добавлять значение -1 после каждого сканирования
+# db.insertData([[now, '1', -1], [now, '45.33.32.1576', 1], [now, '45.33.32.156', 2], [now, '216.58.210.174', 3], [now, '45.33.32.156', 4]])
 
-# data = getData(c, conn, ports=[1, 2, 3, 5], hosts=['45.33.32.156', '216.58.210.174', '45.33.32.1576'], startDate="2020-12-03 17:45:46.797540", endDate="2020-12-03 17:45:46.797540") #Время не получается сравнить ((((
+# print(db.compare(host='45.33.32.156', listOfData=[[now, '45.33.32.156', 2], [now, '45.33.32.156', 13]]))
 
-# for item in data:
-#     print(item)
+# for i in db.getData():
+#     print(i)
 
+# Список портов, которые открылись после прошлого сканирования:
+# [['2020-12-24 15:51:04.002335', '45.33.32.156', 13]].
+# Список портов которые закрылись после прошлого сканирования:
+# [['45.33.32.156', 4]].
 
-# data2 = compare(c, conn, host='45.33.32.156', listOfData=[[now, '45.33.32.156', 2], [now, '45.33.32.156', 13]])
-
-# print(data2)
-
-## result
-#
-##   ***Открытые порты***
-#  
-##   ('2020-12-03 19:36:31.884272', '45.33.32.1576', 1)
-##   ('2020-12-03 19:36:31.884272', '45.33.32.156', 2)
-##   ('2020-12-03 19:36:31.884272', '216.58.210.174', 3)
-#  
-##   Список портов, которые открылись после прошлого сканирования:
-##   [['2020-12-03 19:36:31.884272', '45.33.32.156', 13]].
-##   Список портов которые закрылись после прошлого сканирования:
-##   [['45.33.32.156', 4]].
+# ('2020-12-24 15:49:55.129851', '1', -1)
+# ('2020-12-24 15:49:55.129851', '45.33.32.1576', 1)
+# ('2020-12-24 15:49:55.129851', '45.33.32.156', 2)
+# ('2020-12-24 15:49:55.129851', '216.58.210.174', 3)
+# ('2020-12-24 15:49:55.129851', '45.33.32.156', 4)
