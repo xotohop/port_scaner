@@ -10,7 +10,7 @@ import argparse
 from datetime import datetime
 from dbHelper import ScansDatabase
 
-bot = telebot.TeleBot('1438173397:AAFHadsCXIkxJt_bRq0z97gK4uDkFwgOVgo')
+bot = telebot.TeleBot('')
 
 # сохраняем вывод по-умолчанию (т.е. в консоль)
 stdout_fileno = sys.stdout

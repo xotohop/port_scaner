@@ -7,7 +7,7 @@ from collections import Counter
 import os
 import time
 
-bot = telebot.TeleBot('1438173397:AAFHadsCXIkxJt_bRq0z97gK4uDkFwgOVgo')
+bot = telebot.TeleBot('')
 keyboard1 = telebot.types.ReplyKeyboardMarkup()
 keyboard2 = telebot.types.ReplyKeyboardMarkup()
 keyboard2.row('/Hosts', '/Добавить', '/Назад')
