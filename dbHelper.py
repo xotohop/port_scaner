@@ -2,7 +2,7 @@ import sqlite3
 from datetime import datetime
 
 class ScansDatabase():
-
+    # Инициализация
     def __init__(self):
         self.connection = sqlite3.connect('scan_results.db')
         self.cur = self.connection.cursor()
@@ -19,12 +19,17 @@ class ScansDatabase():
                             PRIMARY KEY (date, host, port))''')
         self.connection.commit()
 
-    # Получить данные из таблицы. Можно получить информациюю за определенную дату или по определенным хостам / портам
-    def getData(self, startDate: str = '2000', endDate: str = '5000', hosts: list = [], ports: list = []):
+    # Получить данные из таблицы. Можно получить информациюю за определенную 
+    # дату или по определенным хостам / портам
+    def getData(self, 
+                startDate: str = '2000', 
+                endDate: str = '5000', 
+                hosts: list = [], 
+                ports: list = []):
         if (ports != []):
-            portsList = f' AND port in ({", ".join(str(k) for k in ports)})'
+            portList = f' AND port in ({", ".join(str(k) for k in ports)})'
         else:
-            portsList = ''
+            portList = ''
 
         if (hosts != []):
             hostList = ' AND host in (' + ", ".join("'{}'".format(k) for k in hosts) + ')'
@@ -32,7 +37,7 @@ class ScansDatabase():
             hostList = ''
         return self.cur.execute(f"""SELECT * FROM scans 
                                     WHERE datetime('{startDate}') <= date <= datetime('{endDate}')
-                                    {hostList}{portsList};""")
+                                    {hostList}{portList};""")
 
     # Запись данных в БД
     def insertData(self, listOfData: list):
@@ -41,7 +46,7 @@ class ScansDatabase():
         self.connection.commit()
 
     # сравнение текущих данных с последней записью в БД
-    def compare(self, host: str, listOfData: list):
+    def compare(self, host: str, currentData: list):
         chages = []
         self.cur.execute(f"""SELECT host, port FROM scans 
                             WHERE date = (SELECT MAX(date) FROM scans WHERE host = '{host}') 
@@ -49,25 +54,29 @@ class ScansDatabase():
         previousData = self.cur.fetchall()
         for item in previousData:
             flag = False
-            for i in listOfData:
+            for i in currentData:
                 if (i[1:] == list(item)):
                     flag = True
-                    listOfData.remove(i)
+                    currentData.remove(i)
             if (flag == False):
                 chages.append(list(item))
-        if (chages == [] and listOfData == []):
+        if (chages == [] and currentData == []):
             return f'\nИзменений с последнего сканирования не обнаружено.'
-        if (chages != [] and listOfData != []):
-            return f'''\nСписок портов, которые открылись после прошлого сканирования:\n{listOfData}.
+
+        if (chages != [] and currentData != []):
+            return f'''\nСписок портов, которые открылись после прошлого сканирования:\n{currentData}.
                         \nСписок портов которые закрылись после прошлого сканирования:\n{chages}.'''
-        if(listOfData != []):
-            return f'\nСписок портов, которые были закрыты при прошлом сканировании:\n{listOfData}.'
+
+        if(currentData != []):
+            return f'\nСписок портов, которые были закрыты при прошлом сканировании:\n{currentData}.'
+
         else:
             return f'\nСписок портов которые закрылись после прошлого сканирования:\n{chages}.'
 
     def __del__(self):
         self.close()
 
+    #Закрытие соединения с БД
     def close(self):
         self.connection.close()
 
@@ -80,7 +89,7 @@ now = str(datetime.now())
 
 db.insertData([[now, '1', -1], [now, '45.33.32.1576', 1], [now, '45.33.32.156', 2], [now, '216.58.210.174', 3], [now, '45.33.32.156', 4]])
 
-print(db.compare(host='45.33.32.156', listOfData=[[now, '45.33.32.156', 2], [now, '45.33.32.156', 13]]))
+print(db.compare(host='45.33.32.156', currentData=[[now, '45.33.32.156', 2], [now, '45.33.32.156', 13]]))
 
 print()
 for i in db.getData():
