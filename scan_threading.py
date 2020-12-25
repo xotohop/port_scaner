@@ -10,7 +10,7 @@ import argparse
 from datetime import datetime
 from dbHelper import ScansDatabase
 
-bot = telebot.TeleBot('')
+bot = telebot.TeleBot('1438173397:AAFHadsCXIkxJt_bRq0z97gK4uDkFwgOVgo')
 
 # сохраняем вывод по-умолчанию (т.е. в консоль)
 stdout_fileno = sys.stdout
@@ -98,16 +98,16 @@ for host in host_list:
     print()
 
 
-#Получение из файла ID пользователя, формирование сообщений об изменении портов с последней работы скрипта, отправка в чат-бот
+# Получение из файла ID пользователя, формирование сообщений об изменении портов с последней работы скрипта, отправка в чат-бот
 def SendNotification():
 	with open('personID') as ff:
 		PersonID = ff.readline()
 	bot.send_message(PersonID, 'Обновилась информация по отслеживаемым хостам:')
 	a = ''
 	for i in host_list:
-		a = str(f'Хост {i}:\n' + database.compare(i, [b for b in curr_data if curr_data[1] == i]))
+		a = str(f'Хост {i}:\n' + database.compare(i, [b for b in curr_data if b[1] == i]))
 		bot.send_message(PersonID, a)
-		time.sleep(1)
+		time.sleep(0.4)
 
 SendNotification()
 
